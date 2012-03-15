@@ -1,5 +1,5 @@
+#-*- coding: utf-8 -*-
 from django.conf import settings
-from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from socialregistration.clients.oauth import OAuth
 from socialregistration.settings import SESSION_KEY
@@ -16,10 +16,10 @@ class Twitter(OAuth):
     def get_callback_url(self):
         if self.is_https():
             return urlparse.urljoin(
-                'https://%s' % Site.objects.get_current().domain,
+                getattr(settings, 'HTTPS_SITE_URL', 'https://'),
                 reverse('socialregistration:twitter:callback'))
         return urlparse.urljoin(
-            'http://%s' % Site.objects.get_current().domain,
+            getattr(settings, 'SITE_URL', 'http://'),
             reverse('socialregistration:twitter:callback'))
     
     def get_user_info(self):

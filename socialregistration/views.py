@@ -24,7 +24,7 @@ class Setup(SocialRegistration, View):
     Setup view to create new Django users from third party APIs.
     """
     template_name = 'socialregistration/setup.html'
-
+    
     def get_form(self):
         """
         Return the form to be used. The return form is controlled

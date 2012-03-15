@@ -1,5 +1,6 @@
+#-*- coding: utf-8 -*-
+import urlparse
 from django.conf import settings
-from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from socialregistration.clients.oauth import OAuth2
 from socialregistration.settings import SESSION_KEY
@@ -20,9 +21,11 @@ class Facebook(OAuth2):
     
     def get_callback_url(self):
         if self.is_https():
-            return 'https://%s%s' % (Site.objects.get_current().domain,
+            return urlparse.urljoin(
+                getattr(settings, 'HTTPS_SITE_URL', 'https://'),
                 reverse('socialregistration:facebook:callback'))
-        return 'http://%s%s' % (Site.objects.get_current().domain,
+        return urlparse.urljoin(
+            getattr(settings, 'SITE_URL', 'http://'),
             reverse('socialregistration:facebook:callback'))
         
     def get_user_info(self):
