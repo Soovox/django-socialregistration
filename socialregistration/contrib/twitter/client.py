@@ -13,13 +13,14 @@ class Twitter(OAuth):
     access_token_url = 'https://api.twitter.com/oauth/access_token'
     auth_url = 'https://api.twitter.com/oauth/authenticate'
     
-    def get_callback_url(self):
+    def get_callback_url(self, subdomain=""):
+        import pdb; pdb.set_trace()
         if self.is_https():
             return urlparse.urljoin(
-                getattr(settings, 'HTTPS_SITE_URL', 'https://'),
+                getattr(settings, 'HTTPS_SITE_URL').replace("%s.", subdomain + "." if subdomain else ""),
                 reverse('socialregistration:twitter:callback'))
         return urlparse.urljoin(
-            getattr(settings, 'SITE_URL', 'http://'),
+            getattr(settings, 'SITE_URL').replace("%s.", subdomain + "." if subdomain else ""),
             reverse('socialregistration:twitter:callback'))
     
     def get_user_info(self):
