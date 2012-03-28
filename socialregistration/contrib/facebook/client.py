@@ -31,7 +31,7 @@ class Facebook(OAuth2):
     def get_user_info(self):
         if self._user_info is None:
             self.graph = facebook.GraphAPI(self._access_token)
-            self._user_info = self.graph.request('me')
+            self._user_info = self.graph.request('me', args={"fields": "bio,last_name,first_name,gender,birthday,location,website,picture", "type": "large"})
         return self._user_info
     
     @staticmethod
