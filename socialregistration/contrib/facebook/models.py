@@ -19,6 +19,12 @@ class FacebookProfile(models.Model):
     def authenticate(self):
         return authenticate(uid=self.uid)
     
+#class FacebookPage(models.Model):
+#    facebook_profile = models.ForeignKey(FacebookProfile)
+#    uid = models.CharField(max_length=255)
+#    name = models.CharField(max_length=255)
+#    access_token = models.CharField(max_length=255, null=True, blank=True)
+#    
 
 def save_facebook_token(sender, user, profile, client, **kwargs):    
     profile.access_token = client.graph.access_token

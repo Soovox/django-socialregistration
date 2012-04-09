@@ -132,6 +132,8 @@ class Setup(SocialRegistration, View):
         
         self.delete_session_data(request)
         
+        request.session['next'] = settings.SOCIALREGISTRATION_AFTER_SIGNUP
+        
         return HttpResponseRedirect(self.get_next(request))
 
 
@@ -249,7 +251,8 @@ class SetupCallback(SocialRegistration, View):
             # Profile existed - but got reconnected. Send the signal and 
             # send the 'em where they were about to go in the first place.
             self.send_connect_signal(request, request.user, profile, client)
-
+            
+            request.session['next'] = settings.SOCIALREGISTRATION_AFTER_SIGNUP
             return self.redirect(request)
 
         # Logged out user - let's see if we've got the identity saved already.
