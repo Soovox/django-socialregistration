@@ -77,13 +77,13 @@ class OAuth(Client):
         
         return client
 
-    def _get_request_token(self):
+    def _get_request_token(self, **kwargs):
         """
         Fetch a request token from `self.request_token_url`.
         """
         
         params = {
-            'oauth_callback': self.get_callback_url()
+            'oauth_callback': self.get_callback_url(kwargs.get("subdomain", ""))
         }
         
         
@@ -101,7 +101,7 @@ class OAuth(Client):
         
         return oauth.Token(token['oauth_token'], token['oauth_token_secret'])
     
-    def _get_access_token(self, verifier=None):
+    def _get_access_token(self, verifier=None, **kwargs):
         """
         Fetch an access token from `self.access_token_url`.
         """
@@ -122,38 +122,38 @@ class OAuth(Client):
         return (oauth.Token(token['oauth_token'], token['oauth_token_secret']),
             token)
         
-    def get_request_token(self):
+    def get_request_token(self, **kwargs):
         """
         Return the request token for this API. If we've not fetched it yet,
         go out, request and memoize it.
         """
         
         if self._request_token is None:
-            self._request_token = self._get_request_token()
+            self._request_token = self._get_request_token(**kwargs)
         return self._request_token
     
-    def get_access_token(self, verifier=None):
+    def get_access_token(self, verifier=None, **kwargs):
         """
         Return the access token for this API. If we've not fetched it yet,
         go out, request and memoize it.
         """
         
         if self._access_token is None:
-            self._access_token, self._access_token_dict = self._get_access_token(verifier)
+            self._access_token, self._access_token_dict = self._get_access_token(verifier, **kwargs)
         return self._access_token
     
     
-    def get_redirect_url(self):
+    def get_redirect_url(self, **kwargs):
         """
         Return the authorization/authentication URL signed with the request 
         token.
         """
         params = {
-            'oauth_token': self.get_request_token().key,
+            'oauth_token': self.get_request_token(**kwargs).key,
         }
         return '%s?%s' % (self.auth_url, urllib.urlencode(params))
     
-    def complete(self, GET):
+    def complete(self, GET, **kwargs):
         """
         When redirect back to our application, try to complete the flow by
         requesting an access token. If the access token request fails, it'll
@@ -162,7 +162,7 @@ class OAuth(Client):
         Tries to complete the flow by validating against the `GET` paramters 
         received.
         """
-        token = self.get_access_token(verifier=GET.get('oauth_verifier', None))
+        token = self.get_access_token(verifier=GET.get('oauth_verifier', None), subdomain=kwargs.get("subdomain", ""))
         return token
     
     def request(self, url, method="GET", params=None, headers=None):
@@ -221,7 +221,7 @@ class OAuth2(Client):
     def client(self):
         return httplib2.Http()
     
-    def get_redirect_url(self, state=''):
+    def get_redirect_url(self, **kwargs):
         """
         Assemble the URL to where we'll be redirecting the user to to request
         permissions.
@@ -229,9 +229,9 @@ class OAuth2(Client):
         params = {
             'response_type': 'code',
             'client_id': self.client_id,
-            'redirect_uri': self.get_callback_url(),
+            'redirect_uri': self.get_callback_url(kwargs.get("subdomain", "")),
             'scope': self.scope or '',
-            'state': state,
+            'state': kwargs.get("state", ""),
         }
         
         return '%s?%s' % (self.auth_url, urllib.urlencode(params))
@@ -261,7 +261,7 @@ class OAuth2(Client):
             'code': code,
             'client_id': self.client_id,
             'client_secret': self.secret,
-            'redirect_uri': self.get_callback_url(),
+            'redirect_uri': self.get_callback_url(subdomain=params.get("subdomain", "")),
         })
         
         resp, content = self.request_access_token(params=params)
@@ -293,7 +293,7 @@ class OAuth2(Client):
                 
         return self._access_token
     
-    def complete(self, GET):
+    def complete(self, GET, **params):
         """
         Complete the OAuth2 flow by fetching an access token with the provided
         code in the GET parameters.
@@ -302,7 +302,7 @@ class OAuth2(Client):
             raise OAuthError(
                 _("Received error while obtaining access token from %s: %s") % (
                     self.access_token_url, GET['error']))
-        return self.get_access_token(code=GET.get('code'))        
+        return self.get_access_token(code=GET.get('code'), subdomain=params.get("subdomain", ""))        
 
     def get_signing_params(self):
         """

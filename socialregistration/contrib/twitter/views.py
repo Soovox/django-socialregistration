@@ -20,5 +20,5 @@ class TwitterSetup(SetupCallback):
     template_name = 'socialregistration/twitter/twitter.html'
     
     def get_lookup_kwargs(self, request, client):
-        return {'twitter_id': client.get_user_info()['user_id']}
+        return {'twitter_id': client.get_user_info()['id_str']}
     

@@ -34,7 +34,5 @@ class FacebookMiddleware(object):
         Enables ``request.facebook`` in your views for authenticated users.
         It's a lazy object that does database lookups.
         """
-        
         request.facebook = SimpleLazyObject(get_facebook_object(request.user))
-        
         return None

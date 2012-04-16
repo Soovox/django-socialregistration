@@ -24,7 +24,7 @@ class Setup(SocialRegistration, View):
     Setup view to create new Django users from third party APIs.
     """
     template_name = 'socialregistration/setup.html'
-
+    
     def get_form(self):
         """
         Return the form to be used. The return form is controlled
@@ -132,6 +132,8 @@ class Setup(SocialRegistration, View):
         
         self.delete_session_data(request)
         
+        request.session['next'] = settings.SOCIALREGISTRATION_AFTER_SIGNUP
+        
         return HttpResponseRedirect(self.get_next(request))
 
 
@@ -169,7 +171,7 @@ class OAuthRedirect(SocialRegistration, View):
         client = self.get_client()()
         request.session[self.get_client().get_session_key()] = client
         try:
-            return HttpResponseRedirect(client.get_redirect_url())
+            return HttpResponseRedirect(client.get_redirect_url(subdomain=request.campaign.name if request.campaign else ""))
         except OAuthError, error:
             return self.render_to_response({'error': error})
 
@@ -208,7 +210,7 @@ class OAuthCallback(SocialRegistration, View):
         """
         try:
             client = request.session[self.get_client().get_session_key()]
-            client.complete(dict(request.GET.items()))
+            client.complete(dict(request.GET.items()), subdomain=request.campaign.name if request.campaign else "")
             request.session[self.get_client().get_session_key()] = client
             return HttpResponseRedirect(self.get_redirect())
         except KeyError:
@@ -249,7 +251,8 @@ class SetupCallback(SocialRegistration, View):
             # Profile existed - but got reconnected. Send the signal and 
             # send the 'em where they were about to go in the first place.
             self.send_connect_signal(request, request.user, profile, client)
-
+            
+            request.session['next'] = settings.SOCIALREGISTRATION_AFTER_SIGNUP
             return self.redirect(request)
 
         # Logged out user - let's see if we've got the identity saved already.
