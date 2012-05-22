@@ -170,8 +170,13 @@ class OAuthRedirect(SocialRegistration, View):
         request.session['next'] = self.get_next(request)
         client = self.get_client()()
         request.session[self.get_client().get_session_key()] = client
+        
+                
         try:
-            return HttpResponseRedirect(client.get_redirect_url(subdomain=request.campaign.name if request.campaign else ""))
+            if hasattr(request, "campaign"):
+                if request.campaign:
+                    return HttpResponseRedirect(client.get_redirect_url(subdomain=request.campaign.name))
+            return HttpResponseRedirect(client.get_redirect_url(subdomain=''))
         except OAuthError, error:
             return self.render_to_response({'error': error})
 
@@ -210,7 +215,7 @@ class OAuthCallback(SocialRegistration, View):
         """
         try:
             client = request.session[self.get_client().get_session_key()]
-            client.complete(dict(request.GET.items()), subdomain=request.campaign.name if request.campaign else "")
+            client.complete(dict(request.GET.items()), subdomain=request.campaign.name if hasattr(request, "campaign") else "")
             request.session[self.get_client().get_session_key()] = client
             return HttpResponseRedirect(self.get_redirect())
         except KeyError:

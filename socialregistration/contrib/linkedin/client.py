@@ -16,13 +16,13 @@ class LinkedIn(OAuth):
     
     _user_info = None
     
-    def get_callback_url(self):
+    def get_callback_url(self, subdomain=""):
         if self.is_https():
             return urlparse.urljoin(
-                'https://%s' % Site.objects.get_current().domain,
+                getattr(settings, 'HTTPS_SITE_URL').replace("%s.", subdomain + "." if subdomain else ""),
                 reverse('socialregistration:linkedin:callback'))
         return urlparse.urljoin(
-            'http://%s' % Site.objects.get_current().domain,
+            getattr(settings, 'SITE_URL').replace("%s.", subdomain + "." if subdomain else ""),
             reverse('socialregistration:linkedin:callback'))
     
     def get_user_info(self):
