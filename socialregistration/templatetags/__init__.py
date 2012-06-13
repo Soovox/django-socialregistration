@@ -25,3 +25,10 @@ class ButtonTag(template.Node):
                 "'to your settings.TEMPLATE_CONTEXT_PROCESSORS'"))
         
         return template.loader.render_to_string(self.template, {'button': self.button}, context)
+
+
+
+
+        
+
+        

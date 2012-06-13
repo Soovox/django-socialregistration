@@ -8,10 +8,11 @@ class UserForm(forms.Form):
     Default user creation form. Can be altered with the 
     `SOCIALREGISTRATION_SETUP_FORM` setting.
     """
-    username = forms.RegexField(r'^\w+$', max_length=32)
+    username = forms.RegexField(r'^\w+$', max_length=20, min_length=5,
+                                error_messages = {'invalid': _("username may contain only letters and numbers.")})
     email = forms.EmailField()
     password = forms.CharField(widget=forms.PasswordInput(render_value=False))
-    password2 = forms.CharField(widget=forms.PasswordInput(render_value=False))
+    #password2 = forms.CharField(widget=forms.PasswordInput(render_value=False))
     
     def clean_username(self):
         username = self.cleaned_data.get('username')
@@ -30,12 +31,12 @@ class UserForm(forms.Form):
             return email
         else:
             raise forms.ValidationError(_(u'This email is already associated with another user.'))
-        
-    def clean(self):
-        if "password" in self.cleaned_data and "password2" in self.cleaned_data:
-            if self.cleaned_data['password'] != self.cleaned_data['password2']:
-                raise forms.ValidationError(_(u'Password does not match the confirm password'))
-        return self.cleaned_data
+#        
+#    def clean(self):
+#        if "password" in self.cleaned_data and "password2" in self.cleaned_data:
+#            if self.cleaned_data['password'] != self.cleaned_data['password2']:
+#                raise forms.ValidationError(_(u'Password does not match the confirm password'))
+#        return self.cleaned_data
     
     def save(self, request, user, profile, client):
         user.username = self.cleaned_data['username']

@@ -4,6 +4,7 @@ from django.core.urlresolvers import reverse
 from socialregistration.clients.oauth import OAuth2
 from socialregistration.settings import SESSION_KEY
 import json
+import urlparse
 
 
 class Foursquare(OAuth2):
@@ -16,11 +17,13 @@ class Foursquare(OAuth2):
     
     _user_info = None
     
-    def get_callback_url(self):
+    def get_callback_url(self, subdomain=""):
         if self.is_https():
-            return 'https://%s%s' % (Site.objects.get_current().domain,
+            return urlparse.urljoin(
+                getattr(settings, 'HTTPS_SITE_URL').replace("%s.", subdomain + "." if subdomain else ""),
                 reverse('socialregistration:foursquare:callback'))
-        return 'http://%s%s' % (Site.objects.get_current().domain,
+        return urlparse.urljoin(
+            getattr(settings, 'SITE_URL').replace("%s.", subdomain + "." if subdomain else ""),
             reverse('socialregistration:foursquare:callback'))
     
     def parse_access_token(self, content):
