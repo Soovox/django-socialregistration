@@ -11,7 +11,7 @@ class UserForm(forms.Form):
     username = forms.RegexField(r'^\w+$', max_length=20, min_length=5,
                                 error_messages = {'invalid': _("username may contain only letters and numbers.")})
     email = forms.EmailField()
-    password = forms.CharField(widget=forms.PasswordInput(render_value=False))
+    password = forms.CharField(widget=forms.PasswordInput(render_value=False), min_length=5)
     #password2 = forms.CharField(widget=forms.PasswordInput(render_value=False))
     
     def clean_username(self):
