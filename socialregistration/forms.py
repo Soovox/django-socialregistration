@@ -8,7 +8,7 @@ class UserForm(forms.Form):
     Default user creation form. Can be altered with the 
     `SOCIALREGISTRATION_SETUP_FORM` setting.
     """
-    username = forms.RegexField(r'^\w+$', max_length=20, min_length=5,
+    username = forms.RegexField(r'^[-\.\w]+$', max_length=20, min_length=5,
                                 error_messages = {'invalid': _("username may contain only letters and numbers.")})
     email = forms.EmailField()
     password = forms.CharField(widget=forms.PasswordInput(render_value=False), min_length=5)

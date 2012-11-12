@@ -6,6 +6,7 @@ from django.views.generic.base import View
 from django.utils.translation import ugettext_lazy as _
 from socialregistration.clients.oauth import OAuthError
 from socialregistration.mixins import SocialRegistration
+from django.shortcuts import render
 
 GENERATE_USERNAME = getattr(settings, 'SOCIALREGISTRATION_GENERATE_USERNAME', False)
 
@@ -91,6 +92,10 @@ class Setup(SocialRegistration, View):
         When signing a new user up - either display a setup form, or
         generate the username automatically.
         """
+        if hasattr(request, "campaign"):
+            if request.campaign.facebook_tab and request.session.get("facebook_authorize", False):
+                return render(request, "include/redirect.html",
+                        {"redirect_url": request.campaign.facebook_tab_url})
         try:
             user, profile, client = self.get_session_data(request)
         except KeyError:
@@ -161,7 +166,10 @@ class OAuthRedirect(SocialRegistration, View):
     
     # The template to render in case of errors
     template_name = None
-    
+
+    def get(self, request):
+        return self.post(request)
+
     def post(self, request):
         """
         Create a client, store it in the user's session and redirect the user
