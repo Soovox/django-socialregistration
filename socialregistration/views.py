@@ -6,6 +6,7 @@ from django.views.generic.base import View
 from django.utils.translation import ugettext_lazy as _
 from socialregistration.clients.oauth import OAuthError
 from socialregistration.mixins import SocialRegistration
+from django.contrib import messages
 from django.shortcuts import render
 
 GENERATE_USERNAME = getattr(settings, 'SOCIALREGISTRATION_GENERATE_USERNAME', False)
@@ -227,9 +228,13 @@ class OAuthCallback(SocialRegistration, View):
             request.session[self.get_client().get_session_key()] = client
             return HttpResponseRedirect(self.get_redirect())
         except KeyError:
-            return self.render_to_response({'error': "Session expired."})
+            messages.success(request, _("Session expired. Please try again."))
+            return HttpResponseRedirect(reverse("index"))
+            #return self.render_to_response({'error': "Session expired."})
         except OAuthError, error:
-            return self.render_to_response({'error': error})
+            messages.success(request, _("You must authorize the app to continue"))
+            return HttpResponseRedirect(reverse("index"))
+            #return self.render_to_response({'error': error})
 
 class SetupCallback(SocialRegistration, View):
     """
@@ -275,13 +280,18 @@ class SetupCallback(SocialRegistration, View):
         
         # No user existing - create a new one and redirect to the final setup view
         if user is None:
+
             user = self.create_user()
             profile = self.create_profile(user, **lookup_kwargs)
             
             self.store_user(request, user)
             self.store_profile(request, profile)
             self.store_client(request, client)
-            
+            if hasattr(request, "campaign"):
+                if request.campaign.facebook_tab:
+                    request.session["facebook_authorize"] = True
+                    return render(request, "include/redirect.html",
+                            {"redirect_url": request.campaign.facebook_tab_url})
             return HttpResponseRedirect(reverse('socialregistration:setup'))
 
         # Inactive user - displaying an error message.

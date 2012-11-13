@@ -271,7 +271,6 @@ class OAuth2(Client):
         content = self.parse_access_token(content)
         
         if 'error' in content:
-            assert False
             raise OAuthError(_(
                 u"Received error while obtaining access token from %s: %s") % (
                     self.access_token_url, content['error']))
