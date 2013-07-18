@@ -12,7 +12,7 @@ METADATA = dict(
     url='http://github.com/flashingpumpkin/django-socialregistration',
     keywords='django facebook twitter oauth openid registration foursquare '\
         'linkedin github oauth2',
-    install_requires=['oauth2', 'python-openid', 'mock'],
+    install_requires=['oauth2', 'python-openid', 'mock', 'requests_oauthlib'],
     include_package_data=True,
     classifiers=[
         'Development Status :: 4 - Beta',
