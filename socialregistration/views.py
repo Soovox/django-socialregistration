@@ -32,6 +32,7 @@ class Setup(SocialRegistration, View):
         Return the form to be used. The return form is controlled
         with ``SOCIALREGISTRATION_SETUP_FORM``.
         """
+
         return self.import_attribute(FORM_CLASS)
     
     def get_username_function(self):

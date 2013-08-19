@@ -5,7 +5,6 @@ from requests_oauthlib.core import OAuth1
 import simplejson
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from oauth_hook import OAuthHook
 from socialregistration.clients.oauth import OAuth
 from socialregistration.settings import SESSION_KEY
 

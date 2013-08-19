@@ -8,12 +8,12 @@ class UserForm(forms.Form):
     Default user creation form. Can be altered with the 
     `SOCIALREGISTRATION_SETUP_FORM` setting.
     """
-    username = forms.RegexField(r'^[-\w]+$', max_length=20, min_length=5,
+    username = forms.RegexField(r'^[-\w]+$', max_length=29, min_length=5,
                                 error_messages = {'invalid': _("username may contain only letters, numbers and dashes.")})
-    email = forms.EmailField()
-    password = forms.CharField(widget=forms.PasswordInput(render_value=False), min_length=5)
-    #password2 = forms.CharField(widget=forms.PasswordInput(render_value=False))
-    
+    email = forms.EmailField(
+        help_text=_(u"Don't worry, we will never sell your info or abuse it.")
+    )
+
     def clean_username(self):
         username = self.cleaned_data.get('username')
         try:
@@ -41,7 +41,7 @@ class UserForm(forms.Form):
     def save(self, request, user, profile, client):
         user.username = self.cleaned_data['username']
         user.email = self.cleaned_data['email']
-        user.set_password(self.cleaned_data['password'])
+        user.set_unusable_password()
         user.save()
         profile.user = user
         profile.save()
